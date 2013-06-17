@@ -7,6 +7,7 @@ class Segment {
   String defaultValue;
 
   Segment(this.name, {this.index, this.required: false, this.defaultValue}) {
+    print('$name - $required');
     if (!required && defaultValue == null) {
       throw 'Segment $name needs a default value.';
     }
@@ -53,7 +54,7 @@ class Route {
       var length = match.length;
       if (length > 1) {
         var segment = match.substring(1, length-1);
-        segments[segment] = new Segment(segment, index: i+1, required: required==0, defaultValue: defaultValues[segment]);
+        segments[segment] = new Segment(segment, index: i+1, required: required, defaultValue: defaultValues[segment]);
       } else {
         required = false;
       }
@@ -75,8 +76,8 @@ class Route {
     // Get the URL pattern from the URI.
     String expression = uri.replaceAll(')', ')?');
     regExp = new RegExp(SEGMENT);
-    expression = expression.replaceAll(regExp, '(\w+)');
-    urlPattern = new UrlPattern(expression);
+    expression = expression.replaceAll(regExp, r'(\w+)');
+    urlPattern = new UrlPattern('($expression)');
     print(uri);
     print(expression);
     print(segments);
@@ -84,8 +85,7 @@ class Route {
 }
 
 main() {
-  new Route('/api(/<library>(/<controller>-<action>))', defaultValues: {
-    'library': 'controller',
+  new Route('/api/<library>(/<controller>-<action>)', defaultValues: {
     'controller': 'mycontroller',
     'action': 'index'
   });
