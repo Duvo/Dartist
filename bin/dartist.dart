@@ -62,6 +62,10 @@ class Server {
     String action = segments[1];
     Map parameters = {'id': segments[2]};
     ClassMirror classMirror = _libraries[library][controller];
-    InstanceMirror instanceMirror = classMirror.newInstance(new Symbol(''), [request, action, parameters]);
+    if (classMirror == null) {
+      send404(request);
+    } else {
+      InstanceMirror instanceMirror = classMirror.newInstance(new Symbol(''), [request, action, parameters]);
+    }
   }
 }
