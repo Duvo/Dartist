@@ -1,0 +1,9 @@
+name: Dartist
+description: Simple Dart web server.
+dependencies:
+  route: any
+dev_dependencies:
+  unittest: any
+
+#dependencies:
+#  unittest: any
