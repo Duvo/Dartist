@@ -10,6 +10,7 @@ abstract class Controller {
     before();
     execute();
     after();
+    request.response.close();
   }
 
   before() {}

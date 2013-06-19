@@ -10,6 +10,9 @@ class HttpRequestMock extends Mock implements HttpRequest {
 
 class HttpResponseMock extends Mock implements HttpResponse {
   int statusCode;
+  var result;
+  var beforeDone = false;
+  var afterDone = false;
   var _onClose;
   void close() {
     if (_onClose != null) {
@@ -20,58 +23,54 @@ class HttpResponseMock extends Mock implements HttpResponse {
 
 class ControllerMock extends Controller {
   var result;
-  var beforeDone = false;
-  var afterDone = false;
 
-  ControllerMock(HttpRequest request, String action, Map<String, String> parameters) : super(request, action, parameters);
+  ControllerMock(HttpRequestMock request, String action, Map<String, String> parameters) : super(request, action, parameters);
 
   before() {
-    beforeDone = true;
+    request.response.beforeDone = true;
   }
 
   after() {
-    afterDone = true;
+    request.response.afterDone = true;
   }
 
   withParameters() {
-    result = parameters['foo'];
+    request.response.result = parameters['foo'];
   }
 
   withoutParameter() {
-    result = 'ok';
+    request.response.result = 'ok';
   }
 }
 
 main() {
-  test('action case sensitivity', () {
-    var request = new HttpRequestMock();
-    request.response._onClose = expectAsync0(() {
-      expect(request.response.statusCode, 404);
-    });
-    var controller = new ControllerMock(request, 'WiThoUTpaRameTer', {});
-  });
 
   test('execute the action with parameters', () {
     var expected = 'bar';
-    var controller = new ControllerMock(null, 'withparameters', {'foo' : expected});
-    expect(controller.result, expected);
+    var request = new HttpRequestMock();
+    request.response._onClose = expectAsync0(() {
+      expect(request.response.result, expected);
+      expect(request.response.beforeDone, isTrue);
+      expect(request.response.afterDone, isTrue);
+    });
+    var controller = new ControllerMock(request, 'withparameters', {'foo' : expected});
   });
 
   test('404', () {
     var request = new HttpRequestMock();
     request.response._onClose = expectAsync0(() {
       expect(request.response.statusCode, 404);
-    });
+      expect(request.response.beforeDone, isTrue);
+    }, count: 2);
     var controller = new ControllerMock(request, 'other', {});
   });
 
-  test('before', () {
-    var controller = new ControllerMock(null, 'withoutparameter', {});
-    expect(controller.beforeDone, isTrue);
-  });
-
-  test('after', () {
-    var controller = new ControllerMock(null, 'withoutparameter', {});
-    expect(controller.afterDone, isTrue);
+  test('action case sensitivity', () {
+    var request = new HttpRequestMock();
+    request.response._onClose = expectAsync0(() {
+      expect(request.response.statusCode, 404);
+      expect(request.response.beforeDone, isTrue);
+    }, count: 2);
+    var controller = new ControllerMock(request, 'WiThoUTpaRameTer', {});
   });
 }
