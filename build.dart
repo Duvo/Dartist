@@ -3,11 +3,12 @@ import 'package:args/args.dart';
 import 'package:unittest/vm_config.dart';
 
 main() {
-  if (true) {
+  if (false) {
     var args = new List.from(new Options().arguments);
     var parser = new ArgParser();
     parser.addOption('removed');
     parser.addOption('changed');
+    parser.addFlag('full');
     parser.addFlag('machine');
     var results = parser.parse(args);
     if (results['changed'] != 'tests.txt') {

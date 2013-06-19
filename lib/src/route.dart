@@ -49,7 +49,7 @@ class Route {
       var length = match.length;
       if (length > 1) {
         var segment = match.substring(1, length-1);
-        segments[segment] = new Segment(segment, index: i+2, required: required, defaultValue: defaultValues[segment]);
+        segments[segment] = new Segment(segment, index: i+1, required: required, defaultValue: defaultValues[segment]);
       } else {
         required = false;
       }

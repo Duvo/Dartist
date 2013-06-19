@@ -1,7 +1,6 @@
 import 'package:unittest/unittest.dart';
 import 'package:unittest/mock.dart';
 import 'package:dartist/dartist.dart';
-import 'dart:async';
 import 'dart:io';
 
 class HttpRequestMock extends Mock implements HttpRequest {
