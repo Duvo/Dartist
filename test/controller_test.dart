@@ -44,7 +44,6 @@ class ControllerMock extends Controller {
 }
 
 main() {
-
   test('execute the action with parameters', () {
     var expected = 'bar';
     var request = new HttpRequestMock();
