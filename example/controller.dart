@@ -1,7 +1,7 @@
 library controller;
 
-import '../bin/dartist.dart';
 import 'dart:io';
+import 'package:dartist/dartist.dart';
 
 class MyController extends Controller {
 

@@ -1,4 +1,4 @@
-name: Dartist
+name: dartist
 description: Simple Dart web server.
 dependencies:
   route: any

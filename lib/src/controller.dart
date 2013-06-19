@@ -15,12 +15,20 @@ abstract class Controller {
   before() {}
 
   execute() {
+    bool found = false;
     InstanceMirror instanceMirror = reflect(this);
     ClassMirror classMirror = instanceMirror.type;
-    MethodMirror methodMirror = classMirror.methods[new Symbol(action)];
-    if (methodMirror != null && methodMirror.isRegularMethod && !methodMirror.isAbstract) {
-      instanceMirror.invoke(new Symbol(action), []);
-    } else {
+    for(Symbol symbol in classMirror.methods.keys) {
+      MethodMirror methodMirror = classMirror.methods[symbol];
+      if (methodMirror.isRegularMethod && !methodMirror.isAbstract) {
+        if (action == MirrorSystem.getName(symbol).toLowerCase()) {
+          instanceMirror.invoke(symbol, []);
+          found = true;
+          break;
+        }
+      }
+    }
+    if (!found) {
       send404(request);
     }
   }

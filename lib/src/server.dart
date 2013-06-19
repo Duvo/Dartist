@@ -1,12 +1,4 @@
-library dartist;
-
-import 'package:route/server.dart';
-import 'package:route/pattern.dart';
-import 'dart:mirrors';
-import 'dart:io';
-
-part 'route.dart';
-part 'controller.dart';
+part of dartist;
 
 class Server {
 
