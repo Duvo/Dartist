@@ -1,3 +1,5 @@
+library test.controller;
+
 import 'package:unittest/unittest.dart';
 import 'package:unittest/mock.dart';
 import 'package:dartist/dartist.dart';

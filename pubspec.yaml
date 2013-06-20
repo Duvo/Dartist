@@ -1,11 +1,11 @@
 name: dartist
 description: Simple Dart web server.
 dependencies:
+  route: any
+dev_dependencies:
   args: any
   crypto: any
   http: any
-  route: any
-dev_dependencies:
   unittest: any
 
 #dependencies:
