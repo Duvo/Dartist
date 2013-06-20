@@ -72,13 +72,12 @@ main() {
       Route route = new Route('/api/<library>(/<controller>-<action>(/<id>))',
           defaultValues: {
             'controller' : defaultController,
-            'action' : defaultAction,
-            'id' : defaultID
+            'action' : defaultAction
           });
       expect(route.urlPattern.pattern, r'(/api/(\w+)(/(\w+)-(\w+)(/(\w+))?)?)');
 
       expect(route.segments['id'].required, isFalse);
-      expect(route.segments['id'].defaultValue, defaultID);
+      expect(route.segments['id'].defaultValue, null);
       expect(route.segments['id'].index, 6);
     });
 

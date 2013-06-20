@@ -41,13 +41,17 @@ class Server {
           value = groups[segment.index];
         }
       } else {
-        if (segment.index == null || segment.index >= groups.length) {
+        if (segment.index == null) {
           value = segment.defaultValue;
         } else {
-          value = groups[segment.index];
+          if (groups[segment.index] == null) {
+            value = segment.defaultValue;
+          } else {
+            value = groups[segment.index];
+          }
         }
       }
-      handle[segment.name] = value.toLowerCase();
+      handle[segment.name] = value;
     }
     return handle;
   }
@@ -68,7 +72,7 @@ class Server {
         send404(request);
       } else {
         if (subclassOf(classMirror, Controller)) {
-          classMirror.newInstance(new Symbol(''), [request, action, segments]);
+          classMirror.newInstance(new Symbol(''), [request, action, segments, request.uri.queryParameters]);
         } else {
           send404(request);
         }

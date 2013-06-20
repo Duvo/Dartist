@@ -6,11 +6,7 @@ class Segment {
   int index;
   String defaultValue;
 
-  Segment(this.name, {this.index, this.required: false, this.defaultValue}) {
-    if (!required && defaultValue == null) {
-      throw new DefaultValueException('Segment $name needs a default value.');
-    }
-  }
+  Segment(this.name, {this.index, this.required: false, this.defaultValue});
 }
 
 class Route {
@@ -65,6 +61,10 @@ class Route {
       Segment segment = segments[key];
       if (segment == null) {
         throw new BaseSegmentException('Segment $key is needed.');
+      } else {
+        if (segment.required == false && segment.defaultValue == null) {
+          throw new DefaultValueException('Segment $key needs a default value.');
+        }
       }
     }
 

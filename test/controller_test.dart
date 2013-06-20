@@ -25,7 +25,12 @@ class HttpResponseMock extends Mock implements HttpResponse {
 class ControllerMock extends Controller {
   var result;
 
-  ControllerMock(HttpRequestMock request, String action, Map<String, String> parameters) : super(request, action, parameters);
+  ControllerMock(HttpRequestMock request,
+      String action,
+      Map<String,
+      String> parameters,
+      Map<String, String> queries)
+      : super(request, action, parameters, queries);
 
   before() {
     request.response.beforeDone = true;
@@ -39,12 +44,27 @@ class ControllerMock extends Controller {
     request.response.result = parameters['foo'];
   }
 
+  withQueries() {
+    request.response.result = queries['foo'];
+  }
+
   withoutParameter() {
     request.response.result = 'ok';
   }
 }
 
 main() {
+  test('execute the action with queries', () {
+    var expected = 'bar';
+    var request = new HttpRequestMock();
+    request.response._onClose = expectAsync0(() {
+      expect(request.response.result, expected);
+      expect(request.response.beforeDone, isTrue);
+      expect(request.response.afterDone, isTrue);
+    });
+    var controller = new ControllerMock(request, 'withqueries', {}, {'foo': expected});
+  });
+
   test('execute the action with parameters', () {
     var expected = 'bar';
     var request = new HttpRequestMock();
@@ -53,7 +73,7 @@ main() {
       expect(request.response.beforeDone, isTrue);
       expect(request.response.afterDone, isTrue);
     });
-    var controller = new ControllerMock(request, 'withparameters', {'foo' : expected});
+    var controller = new ControllerMock(request, 'withparameters', {'foo' : expected}, {});
   });
 
   test('404', () {
@@ -62,7 +82,7 @@ main() {
       expect(request.response.statusCode, 404);
       expect(request.response.beforeDone, isTrue);
     }, count: 2);
-    var controller = new ControllerMock(request, 'other', {});
+    var controller = new ControllerMock(request, 'other', {}, {});
   });
 
   test('action case sensitivity', () {
@@ -71,6 +91,6 @@ main() {
       expect(request.response.statusCode, 404);
       expect(request.response.beforeDone, isTrue);
     }, count: 2);
-    var controller = new ControllerMock(request, 'WiThoUTpaRameTer', {});
+    var controller = new ControllerMock(request, 'WiThoUTpaRameTer', {}, {});
   });
 }

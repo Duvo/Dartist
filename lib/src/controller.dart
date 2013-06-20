@@ -5,8 +5,9 @@ abstract class Controller {
   HttpRequest request;
   String action;
   Map<String, String> parameters;
+  Map<String, String> queries;
 
-  Controller(this.request, this.action, this.parameters) {
+  Controller(this.request, this.action, this.parameters, this.queries) {
     before();
     execute();
     after();
