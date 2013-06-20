@@ -5,31 +5,46 @@ import 'package:dartist/dartist.dart';
 import 'package:http/http.dart' as http;
 import 'dart:mirrors';
 import 'dart:io';
+import 'dart:async';
 
 class FakeController extends Controller {
 
-  FakeController(request, action, parameters, queries) : super(request, action, parameters, queries);
+  FakeController(request, action, parameters) : super(request, action, parameters);
 
-  segmentParameter() {
-    request.response.statusCode = 200;
-    var param = parameters['param'];
-    request.response.write(param);
+  Future segmentParameter() {
+    return request.first.then((data) {
+      request.response.statusCode = 200;
+      var param = parameters['param'];
+      request.response.write(param);
+    });
   }
 
-  queryParameter() {
-    request.response.statusCode = 200;
-    var param = queries['param'];
-    request.response.write(param);
+  Future queryParameter() {
+    return request.first.then((data) {
+      request.response.statusCode = 200;
+      var param = request.uri.queryParameters['param'];
+      request.response.write(param);
+    });
   }
 
-  error() {
-    request.response.statusCode = 500;
+  Future postContent() {
+    return request.first.then((data) {
+      request.response.write(new String.fromCharCodes(data));
+    });
   }
 
-  notFound() {
-    request.response.statusCode = 404;
-    request.response.write('Not Found');
-    request.response.close();
+  Future error() {
+    return request.first.then((data) {
+      request.response.statusCode = 500;
+    });
+  }
+
+  Future notFound() {
+    return request.first.then((data) {
+      request.response.statusCode = 404;
+      request.response.write('Not Found');
+      request.response.close();
+    });
   }
 }
 
@@ -40,7 +55,10 @@ main() {
                 'default': new Route('/default/<controller>-<action>(/<param>)', method: 'GET', defaultValues: {
                   'library' : library
                 }),
-                'library': new Route('/<library>/<controller>-<action>', method: 'GET')
+                'library': new Route('/<library>/<controller>-<action>', method: 'GET'),
+                'post': new Route('/post/<controller>-<action>', method: 'POST', defaultValues: {
+                  'library' : library
+                })
   };
 
   group('server', () {
@@ -51,6 +69,18 @@ main() {
 
     tearDown(() {
       server.stop();
+    });
+
+    group('post', () {
+      test('with content', () {
+        var param = 'foobar';
+        http.post('http://127.0.0.1:8080/post/$controller-postcontent', fields: {'param' : param})
+        .then(expectAsync1((response) {
+          expect(response.statusCode, 200);
+          expect(response.body, param);
+        }))
+        .catchError(expectAsync1((e) {}, count: 0));
+      });
     });
 
     group('get', () {

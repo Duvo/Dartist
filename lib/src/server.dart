@@ -72,7 +72,7 @@ class Server {
         send404(request);
       } else {
         if (subclassOf(classMirror, Controller)) {
-          classMirror.newInstance(new Symbol(''), [request, action, segments, request.uri.queryParameters]);
+          classMirror.newInstance(new Symbol(''), [request, action, segments]);
         } else {
           send404(request);
         }

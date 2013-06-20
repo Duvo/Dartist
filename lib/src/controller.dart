@@ -5,35 +5,30 @@ abstract class Controller {
   HttpRequest request;
   String action;
   Map<String, String> parameters;
-  Map<String, String> queries;
 
-  Controller(this.request, this.action, this.parameters, this.queries) {
-    before();
-    execute();
-    after();
-    request.response.close();
+  Controller(this.request, this.action, this.parameters) {
+    before()
+    .then((_) => execute())
+    .then((_) => after())
+    .whenComplete(() => request.response.close());
   }
 
-  before() {}
+  Future before() => new Future.value();
 
-  execute() {
-    bool found = false;
+  Future execute() {
     InstanceMirror instanceMirror = reflect(this);
     ClassMirror classMirror = instanceMirror.type;
     for(Symbol symbol in classMirror.methods.keys) {
       MethodMirror methodMirror = classMirror.methods[symbol];
       if (methodMirror.isRegularMethod && !methodMirror.isAbstract) {
         if (action == MirrorSystem.getName(symbol).toLowerCase()) {
-          instanceMirror.invoke(symbol, []);
-          found = true;
-          break;
+          return instanceMirror.invoke(symbol, []).reflectee;
         }
       }
     }
-    if (!found) {
-      send404(request);
-    }
+    send404(request);
+    return new Future.value();
   }
 
-  after() {}
+  Future after() => new Future.value();
 }
