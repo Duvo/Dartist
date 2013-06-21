@@ -105,7 +105,6 @@ class Server {
     var segments = _handleSegments(groups, route.segments.values);
     String library = segments['library'];
     String controller = segments['controller'];
-    String action = segments['action'];
 
     var libraryMirror = findLibrary(library);
     if (libraryMirror == null) {
@@ -116,7 +115,7 @@ class Server {
         send404(request);
       } else {
         if (subclassOf(classMirror, Controller)) {
-          classMirror.newInstance(new Symbol(''), [request, action, segments]);
+          classMirror.newInstance(new Symbol(''), [request, segments]);
         } else {
           send404(request);
         }

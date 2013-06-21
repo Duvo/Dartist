@@ -26,10 +26,9 @@ class ControllerMock extends Controller {
   var result;
 
   ControllerMock(HttpRequestMock request,
-      String action,
       Map<String,
       String> parameters)
-      : super(request, action, parameters);
+      : super(request, parameters);
 
   before() {
     request.response.beforeDone = true;
@@ -58,7 +57,7 @@ main() {
       expect(request.response.beforeDone, isTrue);
       expect(request.response.afterDone, isTrue);
     });
-    var controller = new ControllerMock(request, 'withparameters', {'foo' : expected});
+    var controller = new ControllerMock(request, {'action': 'withparameters', 'foo' : expected});
   });
 
   test('404', () {
@@ -67,6 +66,6 @@ main() {
       expect(request.response.statusCode, 404);
       expect(request.response.beforeDone, isTrue);
     }, count: 2);
-    var controller = new ControllerMock(request, 'other', {});
+    var controller = new ControllerMock(request, {'action': 'other'});
   });
 }

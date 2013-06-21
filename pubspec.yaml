@@ -11,6 +11,3 @@ dev_dependencies:
   crypto: any
   http: any
   unittest: any
-
-#dependencies:
-#  unittest: any

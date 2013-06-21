@@ -9,7 +9,7 @@ import 'dart:async';
 
 class FakeController extends Controller {
 
-  FakeController(request, action, parameters) : super(request, action, parameters);
+  FakeController(request, parameters) : super(request, parameters);
 
   segmentParameter() {
     request.response.statusCode = 200;
