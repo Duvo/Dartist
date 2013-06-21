@@ -2,12 +2,12 @@ part of dartist;
 
 /**
  * The [Controller] is the processing part of the [Server].
- * The subclass have to call the super constructor.
+ * The subclasses have to call the super constructor.
  *
  * The [Controller] must be routed to the [Server] with a [Route].
  * For ease of use, the [Controller] must have a simple library name. It will be
  * referenced by the **<library>** [Segment] in the [Route]. The class name of
- * this [Controller] is important to, it will be referenced by the **<controller>**
+ * this [Controller] is important too, it will be referenced by the **<controller>**
  * [Segment]. And finally, functions names are also important, because the
  * **<action>** [Segment] can be used.
  *
@@ -28,7 +28,7 @@ part of dartist;
  *
  *      new Route('/<library>/<controller>/<action>');
  *
- * Our action can be reached by the URL:
+ * Our **<action>** can be reached by the URL:
  *
  *      /mylibrary/mycontroller/myaction?param=foobar
  *
@@ -43,8 +43,8 @@ part of dartist;
  *
  *      /api/myaction?param=foobar
  *
- * The [Controller] knows the [HttpRequest](dart.io) that called it. So, it can
- * access to all [HttpRequest](dart.io) information, like query parameters or
+ * The [Controller] knows the [HttpRequest] that called it. Thus, it can
+ * access to all [HttpRequest] information, like query parameters or
  * posted data. For example:
  *
  *      this.request.uri.queryParameters['param'];
@@ -70,8 +70,8 @@ abstract class Controller {
   /**
    * Create a [Controller] with the given [request] and [parameters] that
    * contains a [Map] of [Segment]s values. The new [Controller] automatically
-   * calls [before] method, then run the action, depending of the [Segment] and
-   * finally calls the [after] method.
+   * calls [before], then runs the **<action>**, depending on the [Segment] and
+   * finally calls [after].
    */
   Controller(this.request, this.parameters) {
     new Future.sync(() => before())
@@ -81,20 +81,20 @@ abstract class Controller {
   }
 
   /**
-   * The function executed before the action.
+   * The function executed before the **<action>**.
    *
    * If the return is a [Future](dart.async) the [Controller] will wait until
-   * the returned [Future] completes. Otherwise the [Controller] simply run the
-   * action after.
+   * the returned [Future] completes. Otherwise the [Controller] simply runs the
+   * **<action>** afterwards.
    */
   dynamic before() {}
 
   /**
-   * The main function of the [Controller]. It handles the action from
-   * [parameters], then checks and calls the correct action.
+   * The main function of the [Controller]. It handles the **<action>** from
+   * [parameters], then checks and calls the correct **<action>**.
    *
-   * Return the value returned by the called action, or send a 404 error if this
-   * action doesn't exists, then return [:null:].
+   * Return the value returned by the called **<action>**, or send a 404 error if this
+   * **<action>** doesn't exist, then return [:null:].
    */
   dynamic execute() {
     String action = parameters['action'];
@@ -112,7 +112,7 @@ abstract class Controller {
   }
 
   /**
-   * The function executed after the action.
+   * The function executed after the **<action>**.
    *
    * If the return is a [Future](dart.async) the [Controller] will wait until
    * the returned future completes. Otherwise the [Controller] directly close
@@ -123,10 +123,10 @@ abstract class Controller {
   /**
    * Parse the content of the [request], and extract a [Map] of its values.
    *
-   * This [Map] is stored in [_fields], so, for the next call, the values will
-   * be directly retrieved from [_fields], and not parsed from the [request].
+   * This [Map] is stored in the [Controller] instance, so, for the next call, the values will
+   * be directly retrieved from its attribut, and not parsed from the [request].
    *
-   * Return a [Future](dart.async) containing the [Map] of the [request] content.
+   * Return a [Future] containing the [Map] of the [request] content.
    */
   Future<Map<String, String>> getFields() {
     if (_fields == null) {
@@ -140,10 +140,10 @@ abstract class Controller {
   }
 
   /**
-   * Load the content of the [File](dart.io) targeted by the [filepath].
+   * Load the content of the [File] targeted by the [filepath].
    *
    * Return the [String] content of the [File](dart.io), or [:null:] if the
-   * [File](dart.io) doesn't exist.
+   * [File] doesn't exist.
    */
   String loadFile(filepath) {
     final File file = new File(filepath);
