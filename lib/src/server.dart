@@ -5,9 +5,11 @@ class Server {
   int port;
   int backlog;
   Map<String, Route> routes;
+  List<String> extensionsAllowed;
+  List<String> foldersAllowed;
   HttpServer _server;
 
-  Server(this.address, this.port, {this.backlog: 0, Map<String, Route> routes}) {
+  Server(this.address, this.port, {this.backlog: 0, Map<String, Route> routes, this.extensionsAllowed, this.foldersAllowed}) {
     this.routes = ?routes ? routes : {};
   }
 
@@ -16,8 +18,18 @@ class Server {
     HttpServer.bind(address, port, backlog: backlog).then((HttpServer server) {
       _server = server;
       var router = new Router(_server);
+
+      if (extensionsAllowed != null) {
+        var extensionsPattern = new UrlPattern(r'(.*)\.((' + extensionsAllowed.join(')|(') + r'))');
+        router.filter(extensionsPattern, _directAccessFilter);
+      }
+      if (foldersAllowed != null) {
+        var foldersPattern = new UrlPattern(r'((' + foldersAllowed.join(')|(') + '))/(.*)');
+        router.filter(foldersPattern, _directAccessFilter);
+      }
+
       routes.forEach((var key, Route route) {
-        router.serve(route.urlPattern, method: route.method).listen((HttpRequest request) {
+        router.serve(route.urlPattern, method: route.method).listen((request) {
           _dispatch(route, request);
         });
       });
@@ -28,6 +40,38 @@ class Server {
 
   void stop() {
     _server.close();
+  }
+
+  Future<bool> _directAccessFilter(HttpRequest request) {
+    final File file = new File('.' + request.uri.path);
+    return file.exists().then((bool found) {
+      if (found) {
+        file.fullPath().then((String fullPath) {
+          file.openRead()
+          .pipe(request.response)
+          .catchError((e) { });
+        });
+        return false;
+      } else {
+        return true;
+      }
+    });
+  }
+
+  Future<bool> _folderFilter(HttpRequest request) {
+    final File file = new File('.' + request.uri.path);
+    return file.exists().then((bool found) {
+      if (found) {
+        file.fullPath().then((String fullPath) {
+          file.openRead()
+          .pipe(request.response)
+          .catchError((e) { });
+        });
+        return false;
+      } else {
+        return true;
+      }
+    });
   }
 
   Map<String, String> _handleSegments(List<String> groups, Iterable<Segment> segments) {

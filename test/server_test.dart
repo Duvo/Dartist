@@ -30,6 +30,11 @@ class FakeController extends Controller {
     });
   }
 
+  html() {
+    request.response.statusCode = 200;
+    request.response.write(loadFile('examples/test.html'));
+  }
+
   error() {
     request.response.statusCode = 500;
   }
@@ -55,7 +60,9 @@ main() {
   };
 
   group('server', () {
-    Server server = new Server('127.0.0.1', 8080, routes: routes);
+    Server server = new Server('127.0.0.1', 8080, routes: routes,
+        extensionsAllowed: ['css', 'jpg', 'js'],
+        foldersAllowed: ['/examples/public']);
     setUp(() {
       return server.start();
     });
@@ -87,6 +94,60 @@ main() {
     });
 
     group('get', () {
+      test('resource', () {
+        http.get('http://127.0.0.1:8080/examples/test.css')
+        .then(expectAsync1((response) {
+          expect(response.statusCode, 200);
+          expect(response.body, 'body{color:blue;}');
+        }))
+        .catchError(expectAsync1((e) {}, count: 0));
+      });
+
+      test('resource case extension', () {
+        http.get('http://127.0.0.1:8080/examples/case.CSS')
+        .then(expectAsync1((response) {
+          expect(response.statusCode, 404);
+          expect(response.body, 'Not Found');
+        }))
+        .catchError(expectAsync1((e) {}, count: 0));
+      });
+
+      test('resource folder', () {
+        http.get('http://127.0.0.1:8080/examples/public/test.html')
+        .then(expectAsync1((response) {
+          expect(response.statusCode, 200);
+          expect(response.body, 'It works!');
+        }))
+        .catchError(expectAsync1((e) {}, count: 0));
+      });
+
+      test('resource 404', () {
+        http.get('http://127.0.0.1:8080/examples/foo.css')
+        .then(expectAsync1((response) {
+          expect(response.statusCode, 404);
+          expect(response.body, 'Not Found');
+        }))
+        .catchError(expectAsync1((e) {}, count: 0));
+      });
+
+      test('resource forbidden', () {
+        http.get('http://127.0.0.1:8080/examples/test.html')
+        .then(expectAsync1((response) {
+          expect(response.statusCode, 404);
+          expect(response.body, 'Not Found');
+        }))
+        .catchError(expectAsync1((e) {}, count: 0));
+      });
+
+      test('html', () {
+        http.get('http://127.0.0.1:8080/default/$controller-html')
+        .then(expectAsync1((response) {
+          expect(response.statusCode, 200);
+          expect(response.body, 'It works!');
+        }))
+        .catchError(expectAsync1((e) {}, count: 0));
+      });
+
       test('with query', () {
         var param = 'foobar';
         http.get('http://127.0.0.1:8080/default/$controller-queryparameter?param=$param')

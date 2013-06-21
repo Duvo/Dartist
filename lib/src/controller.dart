@@ -42,4 +42,11 @@ abstract class Controller {
       return new Future.value(_fields);
     }
   }
+
+  String loadFile(path) {
+    final File file = new File(path);
+    if (file.existsSync()) {
+      return file.readAsStringSync();
+    }
+  }
 }
