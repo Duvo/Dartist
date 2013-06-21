@@ -2,7 +2,7 @@ part of example;
 
 class Index extends Controller {
 
-  Index(request, action, parameters) : super(request, action, parameters);
+  Index(request, parameters) : super(request, parameters);
 
   index() {
     request.response.write(loadFile('views/index.html'));
@@ -11,7 +11,7 @@ class Index extends Controller {
 
 class Api extends Controller {
 
-  Api(request, action, parameters) : super(request, action, parameters);
+  Api(request, parameters) : super(request, parameters);
 
   Map<String, String> users = {
                                'bob': 'Bob',
