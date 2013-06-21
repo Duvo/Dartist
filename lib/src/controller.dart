@@ -2,13 +2,14 @@ part of dartist;
 
 /**
  * The [Controller] is the processing part of the [Server].
- * The subclass have to call the super constructor. For example:
+ * The subclass have to call the super constructor.
  *
  * The [Controller] must be routed to the [Server] with a [Route].
- * For ease of use, the [Controller] must have a simple library name. It will be referenced by
- * the **<library>** [Segment] in the [Route]. The class name of this [Controller] is important to,
- * it will be referenced by the **<controller>** [Segment]. And finally, functions names are also important,
- * because the **<action>** [Segment] can be used.
+ * For ease of use, the [Controller] must have a simple library name. It will be
+ * referenced by the **<library>** [Segment] in the [Route]. The class name of
+ * this [Controller] is important to, it will be referenced by the **<controller>**
+ * [Segment]. And finally, functions names are also important, because the
+ * **<action>** [Segment] can be used.
  *
  *      library mylibrary;
  *      import package:dartist/dartist.dart;
@@ -21,9 +22,9 @@ part of dartist;
  *        }
  *      }
  *
- * All of these [Segment]s are not case sensitive, but they are required.
- * They must be present in the route either in the URL or in the defaults values. ​​
- * For example with the [Route]:
+ * All of these [Segment]s are not case sensitive, but they are required. They
+ * must be present in the route either in the URL or in the defaults values. For
+ * example with the [Route]:
  *
  *      new Route('/<library>/<controller>/<action>');
  *
@@ -42,8 +43,9 @@ part of dartist;
  *
  *      /api/myaction?param=foobar
  *
- * The [Controller] knows the [HttpRequest](dart.io) that called it. So, it can access to all [HttpRequest](dart.io) informations,
- * like query parameters or posted data. For example:
+ * The [Controller] knows the [HttpRequest](dart.io) that called it. So, it can
+ * access to all [HttpRequest](dart.io) information, like query parameters or
+ * posted data. For example:
  *
  *      this.request.uri.queryParameters['param'];
  */
@@ -60,14 +62,16 @@ abstract class Controller {
   Map<String, String> parameters;
 
   /**
-   * The [Map] that containts parsed fields of the request content. It is used for cache.
+   * The [Map] that contains parsed fields of the request content.
+   * It is used for cache.
    */
   Map _fields;
 
   /**
-   * Create a [Controller] with the given [request] and [parameters] that contains a [Map]
-   * of [Segment]s values. The new [Controller] automatically calls [before] method, then run the action,
-   * depending of the [Segment] and finally calls the [after] method.
+   * Create a [Controller] with the given [request] and [parameters] that
+   * contains a [Map] of [Segment]s values. The new [Controller] automatically
+   * calls [before] method, then run the action, depending of the [Segment] and
+   * finally calls the [after] method.
    */
   Controller(this.request, this.parameters) {
     new Future.sync(() => before())
@@ -79,17 +83,18 @@ abstract class Controller {
   /**
    * The function executed before the action.
    *
-   * If the return is a [Future](dart.async) the [Controller] will wait until the returned future completes.
-   * Otherwise the [Controller] simply run the action after.
+   * If the return is a [Future](dart.async) the [Controller] will wait until
+   * the returned [Future] completes. Otherwise the [Controller] simply run the
+   * action after.
    */
   dynamic before() {}
 
   /**
-   * The main function of the [Controller]. It handles the action from [parameters], then checks and calls the
-   * correct action.
+   * The main function of the [Controller]. It handles the action from
+   * [parameters], then checks and calls the correct action.
    *
-   * Return the value returned by the called action, or send a 404 error if this action dosen't exists, then
-   * return [:null:].
+   * Return the value returned by the called action, or send a 404 error if this
+   * action doesn't exists, then return [:null:].
    */
   dynamic execute() {
     String action = parameters['action'];
@@ -109,16 +114,17 @@ abstract class Controller {
   /**
    * The function executed after the action.
    *
-   * If the return is a [Future](dart.async) the [Controller] will wait until the returned future completes.
-   * Otherwise the [Controller] directly close the [request].
+   * If the return is a [Future](dart.async) the [Controller] will wait until
+   * the returned future completes. Otherwise the [Controller] directly close
+   * the [request].
    */
   dynamic after() {}
 
   /**
    * Parse the content of the [request], and extract a [Map] of its values.
    *
-   * This [Map] is stored in [_fields], so, for the next call, the values will be directly retrieved from
-   * [_fields], and not parsed from the [request].
+   * This [Map] is stored in [_fields], so, for the next call, the values will
+   * be directly retrieved from [_fields], and not parsed from the [request].
    *
    * Return a [Future](dart.async) containing the [Map] of the [request] content.
    */
@@ -136,7 +142,8 @@ abstract class Controller {
   /**
    * Load the content of the [File](dart.io) targeted by the [filepath].
    *
-   * Return the [String] content of the [File](dart.io), or [:null:] if the [File](dart.io) dosen't exist.
+   * Return the [String] content of the [File](dart.io), or [:null:] if the
+   * [File](dart.io) doesn't exist.
    */
   String loadFile(filepath) {
     final File file = new File(filepath);

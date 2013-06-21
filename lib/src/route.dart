@@ -1,5 +1,8 @@
 part of dartist;
 
+/**
+ * Class [Segment].
+ */
 class Segment {
   String name;
   bool required;
@@ -9,6 +12,9 @@ class Segment {
   Segment(this.name, {this.index, this.required: false, this.defaultValue});
 }
 
+/**
+ * Class [Route].
+ */
 class Route {
 
   static const String LIBRARY = 'library';
@@ -76,18 +82,31 @@ class Route {
   }
 }
 
+/**
+ * Class [RouteException].
+ */
 class RouteException extends DartistException {
   const RouteException(String message) : super(message);
 }
 
+/**
+ * Class [DefaultValueException].
+ */
 class DefaultValueException extends RouteException {
   const DefaultValueException(String message) : super(message);
 }
 
+
+/**
+ * Class [BaseSegmentException].
+ */
 class BaseSegmentException extends RouteException {
   const BaseSegmentException(String message) : super(message);
 }
 
+/**
+ * Class [ParenthesisException].
+ */
 class ParenthesisException extends RouteException {
   const ParenthesisException(String message) : super(message);
 }

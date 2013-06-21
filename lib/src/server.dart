@@ -1,5 +1,8 @@
 part of dartist;
 
+/**
+ * Class [Server]
+ */
 class Server {
   var address;
   int port;
@@ -124,10 +127,16 @@ class Server {
   }
 }
 
+/**
+ * Class [ServerException].
+ */
 class ServerException extends DartistException {
   const ServerException(String message) : super(message);
 }
 
+/**
+ * Class [RequiredSegmentException].
+ */
 class RequiredSegmentException extends ServerException {
   const RequiredSegmentException(String message) : super(message);
 }

@@ -1,3 +1,6 @@
+/**
+ * Library [dartist].
+ */
 library dartist;
 
 import 'package:route/server.dart';

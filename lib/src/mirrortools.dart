@@ -1,5 +1,8 @@
 part of dartist;
 
+/**
+ * First-level method [findLibrary].
+ */
 findLibrary(String library, {caseSensitive: false}) {
   if (caseSensitive) {
     Iterable libraries = currentMirrorSystem().findLibrary(new Symbol(library));
@@ -13,6 +16,9 @@ findLibrary(String library, {caseSensitive: false}) {
   }
 }
 
+/**
+ * First-level method [findClass].
+ */
 findClass(String className, LibraryMirror libraryMirror, {caseSensitive: false}) {
   if (caseSensitive) {
     return libraryMirror.classes[new Symbol(className)];
@@ -25,6 +31,9 @@ findClass(String className, LibraryMirror libraryMirror, {caseSensitive: false})
   }
 }
 
+/**
+ * First-level method [subclassOf].
+ */
 subclassOf(ClassMirror subclassMirror, Type superclass) {
   ClassMirror objectMirror = reflectClass(Object);
   ClassMirror superclassMirror = reflectClass(superclass);
