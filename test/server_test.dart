@@ -11,40 +11,33 @@ class FakeController extends Controller {
 
   FakeController(request, action, parameters) : super(request, action, parameters);
 
-  Future segmentParameter() {
-    return request.first.then((data) {
+  segmentParameter() {
+    request.response.statusCode = 200;
+    var param = parameters['param'];
+    request.response.write(param);
+  }
+
+  queryParameter() {
+    request.response.statusCode = 200;
+    var param = request.uri.queryParameters['param'];
+    request.response.write(param);
+  }
+
+  postContent() {
+    return getFields().then((fields) {
       request.response.statusCode = 200;
-      var param = parameters['param'];
-      request.response.write(param);
+      request.response.write(fields['param']);
     });
   }
 
-  Future queryParameter() {
-    return request.first.then((data) {
-      request.response.statusCode = 200;
-      var param = request.uri.queryParameters['param'];
-      request.response.write(param);
-    });
+  error() {
+    request.response.statusCode = 500;
   }
 
-  Future postContent() {
-    return request.first.then((data) {
-      request.response.write(new String.fromCharCodes(data));
-    });
-  }
-
-  Future error() {
-    return request.first.then((data) {
-      request.response.statusCode = 500;
-    });
-  }
-
-  Future notFound() {
-    return request.first.then((data) {
-      request.response.statusCode = 404;
-      request.response.write('Not Found');
-      request.response.close();
-    });
+  notFound() {
+    request.response.statusCode = 404;
+    request.response.write('Not Found');
+    request.response.close();
   }
 }
 
@@ -74,6 +67,16 @@ main() {
     group('post', () {
       test('with content', () {
         var param = 'foobar';
+        http.post('http://127.0.0.1:8080/post/$controller-postcontent', fields: {'param' : param})
+        .then(expectAsync1((response) {
+          expect(response.statusCode, 200);
+          expect(response.body, param);
+        }))
+        .catchError(expectAsync1((e) {}, count: 0));
+      });
+
+      test('with strange content', () {
+        var param = 'foo&bar=foobar';
         http.post('http://127.0.0.1:8080/post/$controller-postcontent', fields: {'param' : param})
         .then(expectAsync1((response) {
           expect(response.statusCode, 200);

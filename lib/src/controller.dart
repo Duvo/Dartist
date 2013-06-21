@@ -5,30 +5,41 @@ abstract class Controller {
   HttpRequest request;
   String action;
   Map<String, String> parameters;
+  Map _fields;
 
   Controller(this.request, this.action, this.parameters) {
-    before()
-    .then((_) => execute())
-    .then((_) => after())
+    new Future.sync(() => before())
+    .then((_) => new Future.sync(() => execute()))
+    .then((_) => new Future.sync(() => after()))
     .whenComplete(() => request.response.close());
   }
 
-  Future before() => new Future.value();
+  before() {}
 
-  Future execute() {
+  execute() {
     InstanceMirror instanceMirror = reflect(this);
     ClassMirror classMirror = instanceMirror.type;
     for(Symbol symbol in classMirror.methods.keys) {
       MethodMirror methodMirror = classMirror.methods[symbol];
       if (methodMirror.isRegularMethod && !methodMirror.isAbstract) {
-        if (action == MirrorSystem.getName(symbol).toLowerCase()) {
+        if (action.toLowerCase() == MirrorSystem.getName(symbol).toLowerCase()) {
           return instanceMirror.invoke(symbol, []).reflectee;
         }
       }
     }
     send404(request);
-    return new Future.value();
   }
 
-  Future after() => new Future.value();
+  after() {}
+
+  Future<Map<String, String>> getFields() {
+    if (_fields == null) {
+      return request.first.then((data) {
+        _fields = Uri.splitQueryString(new String.fromCharCodes(data));
+        return _fields;
+      });
+    } else {
+      return new Future.value(_fields);
+    }
+  }
 }

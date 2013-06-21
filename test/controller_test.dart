@@ -69,13 +69,4 @@ main() {
     }, count: 2);
     var controller = new ControllerMock(request, 'other', {});
   });
-
-  test('action case sensitivity', () {
-    var request = new HttpRequestMock();
-    request.response._onClose = expectAsync0(() {
-      expect(request.response.statusCode, 404);
-      expect(request.response.beforeDone, isTrue);
-    }, count: 2);
-    var controller = new ControllerMock(request, 'WiThoUTpaRameTer', {});
-  });
 }
