@@ -4,6 +4,7 @@ import 'package:unittest/unittest.dart';
 import 'package:unittest/mock.dart';
 import 'package:dartist/dartist.dart';
 import 'dart:io';
+import 'examples/template.dart';
 
 class HttpRequestMock extends Mock implements HttpRequest {
   HttpResponseMock response = new HttpResponseMock();
@@ -45,9 +46,28 @@ class ControllerMock extends Controller {
   withoutParameter() {
     request.response.result = 'ok';
   }
+
+  withTemplate() {
+    var context = {
+                   'title' : 'My Title',
+                   'options': ['Foo', 'Bar', 'Foobar']
+    };
+    request.response.result = template(context);
+  }
 }
 
 main() {
+
+  test('with template', () {
+    var expected = ['<li>Foo</li>','<li>Bar</li>', '<li>Foobar</li>'];
+    var request = new HttpRequestMock();
+    request.response._onClose = expectAsync0(() {
+      expect(request.response.result, stringContainsInOrder(expected));
+      expect(request.response.beforeDone, isTrue);
+      expect(request.response.afterDone, isTrue);
+    });
+    var controller = new ControllerMock(request, {'action': 'withtemplate'});
+  });
 
   test('execute the action with parameters', () {
     var expected = 'bar';
