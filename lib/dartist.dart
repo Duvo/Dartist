@@ -6,7 +6,7 @@ library dartist;
 import 'package:route/server.dart';
 import 'package:route/pattern.dart';
 import 'package:mustache/mustache.dart' as mustache;
-import 'mirrortools.dart' as mirror;
+import 'package:dartist/mirrortools.dart' as mirror;
 
 import 'dart:mirrors';
 import 'dart:io';

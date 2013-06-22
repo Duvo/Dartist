@@ -1,7 +1,7 @@
 library test.mirrortools;
 
 import 'package:unittest/unittest.dart';
-import '../lib/mirrortools.dart';
+import 'package:dartist/mirrortools.dart';
 import 'dart:mirrors';
 
 class Foo {
