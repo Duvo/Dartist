@@ -109,15 +109,15 @@ class Server {
     String library = segments['library'];
     String controller = segments['controller'];
 
-    var libraryMirror = findLibrary(library);
+    var libraryMirror = mirror.findLibrary(library);
     if (libraryMirror == null) {
       send404(request);
     } else {
-      var classMirror = findClass(controller, libraryMirror);
+      var classMirror = mirror.findClass(controller, libraryMirror);
       if (classMirror == null) {
         send404(request);
       } else {
-        if (subclassOf(classMirror, Controller)) {
+        if (mirror.subclassOf(classMirror, Controller)) {
           classMirror.newInstance(new Symbol(''), [request, segments]);
         } else {
           send404(request);

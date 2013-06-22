@@ -2,11 +2,16 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Dartlist example</title>
+  <title>{{title}}</title>
   <link rel="stylesheet" href="/public/example.css">
 </head>
 <body>
-  <h1>Index of Dartlist example</h1>
+  <h1>{{title}}</h1>
+  <ul>
+    {{#options}}
+        <li>{{.}}</li>
+    {{/options}}
+  </ul>
   <button id="button" type="button">Press me!</button>
   <script type="application/dart" src="/public/index.dart"></script>
   <script src="/packages/browser/dart.js"></script>

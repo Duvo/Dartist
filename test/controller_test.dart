@@ -4,6 +4,7 @@ import 'package:unittest/unittest.dart';
 import 'package:unittest/mock.dart';
 import 'package:dartist/dartist.dart';
 import 'dart:io';
+
 import 'examples/template.dart';
 
 class HttpRequestMock extends Mock implements HttpRequest {
@@ -21,6 +22,13 @@ class HttpResponseMock extends Mock implements HttpResponse {
       _onClose();
     }
   }
+}
+
+class Foobar {
+  String foo;
+  String bar;
+
+  Foobar(this.foo, this.bar);
 }
 
 class ControllerMock extends Controller {
@@ -54,6 +62,18 @@ class ControllerMock extends Controller {
     };
     request.response.result = template(context);
   }
+
+  withMustache() {
+    var context = {
+                   'title' : 'My Title',
+                   'options': [
+                               new Foobar('foo1', 'bar1'),
+                               new Foobar('foo2', 'bar2'),
+                               new Foobar('foo3', 'bar3')
+                   ]
+    };
+    request.response.result = renderMustache('examples/mustache.html', context);
+  }
 }
 
 main() {
@@ -67,6 +87,17 @@ main() {
       expect(request.response.afterDone, isTrue);
     });
     var controller = new ControllerMock(request, {'action': 'withtemplate'});
+  });
+
+  test('with mustache', () {
+    var expected = ['<li>foo1-bar1</li>','<li>foo2-bar2</li>', '<li>foo3-bar3</li>'];
+    var request = new HttpRequestMock();
+    request.response._onClose = expectAsync0(() {
+      expect(request.response.result, stringContainsInOrder(expected));
+      expect(request.response.beforeDone, isTrue);
+      expect(request.response.afterDone, isTrue);
+    });
+    var controller = new ControllerMock(request, {'action': 'withmustache'});
   });
 
   test('execute the action with parameters', () {

@@ -1,4 +1,6 @@
-part of dartist;
+library mirrortools;
+
+import 'dart:mirrors';
 
 /**
  * First-level method [findLibrary].
@@ -45,4 +47,41 @@ subclassOf(ClassMirror subclassMirror, Type superclass) {
     currentMirror = currentMirror.superclass;
   }
   return false;
+}
+
+/**
+ * First-level method [mapFromObject].
+ */
+mapFromObject(dynamic object) {
+  if (object == null || object is String) {
+    return object;
+  }else if (object is Map) {
+    Map map = {};
+    for (var key in object.keys) {
+      String tmpKey;
+      if (key is int) {
+        tmpKey = key.toString();
+      } else if (key is String) {
+        tmpKey = key;
+      } else {
+        throw 'Map keys must be int or String.';
+      }
+      map[tmpKey] = mapFromObject(object[key]);
+    }
+    return map;
+  } else if (object is Iterable) {
+    var length = object.length;
+    return new List.generate(length, (i) => mapFromObject(object[i]), growable: false);
+  } else {
+    Map map = {};
+    InstanceMirror instanceMirror = reflect(object);
+    ClassMirror classMirror = instanceMirror.type;
+    for(Symbol key in classMirror.variables.keys) {
+      map[MirrorSystem.getName(key)] = mapFromObject(instanceMirror.getField(key).reflectee);
+    }
+    for(Symbol key in classMirror.getters.keys) {
+      map[MirrorSystem.getName(key)] = mapFromObject(instanceMirror.getField(key).reflectee);
+    }
+    return map;
+  }
 }

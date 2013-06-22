@@ -5,7 +5,11 @@ class Index extends Controller {
   Index(request, parameters) : super(request, parameters);
 
   index() {
-    request.response.write(loadFile('views/index.html'));
+    Map context = {
+                   'title': 'Dart example',
+                   'options': ['option 1', 'option 2', 'option 3']
+    };
+    request.response.write(renderMustache('views/index.html', context));
   }
 }
 

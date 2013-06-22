@@ -52,7 +52,7 @@ part of dartist;
 abstract class Controller {
 
   /**
-   * The [HttpRequest](dart.io) that called this [Controller].
+   * The [HttpRequest] that called this [Controller].
    */
   HttpRequest request;
 
@@ -77,7 +77,9 @@ abstract class Controller {
     new Future.sync(() => before())
     .then((_) => new Future.sync(() => execute()))
     .then((_) => new Future.sync(() => after()))
-    .whenComplete(() => request.response.close());
+    .whenComplete(() {
+      request.response.close();
+    });
   }
 
   /**
@@ -130,7 +132,7 @@ abstract class Controller {
    */
   Future<Map<String, String>> getFields() {
     if (_fields == null) {
-      return request.first.then((data) {
+      return request.single.then((data) {
         _fields = Uri.splitQueryString(new String.fromCharCodes(data));
         return _fields;
       });
@@ -145,10 +147,24 @@ abstract class Controller {
    * Return the [String] content of the [File](dart.io), or [:null:] if the
    * [File] doesn't exist.
    */
-  String loadFile(filepath) {
+  String loadFile(String filepath) {
     final File file = new File(filepath);
     if (file.existsSync()) {
       return file.readAsStringSync();
     }
+  }
+
+  /**
+   * Render the mustache template targeted by the [filepath] with the [context]
+   * given.
+   *
+   * Return the result [String] generated, or [:null:] if the [File] doesn't
+   * exist.
+   */
+  String renderMustache(String filepath, Map<String, dynamic> context) {
+    var tmp = mirror.mapFromObject(context);
+    var source = loadFile(filepath);
+    var template = mustache.parse(source);
+    return template.renderString(tmp);
   }
 }

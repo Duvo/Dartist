@@ -79,7 +79,7 @@ main() {
           expect(response.statusCode, 200);
           expect(response.body, param);
         }))
-        .catchError(expectAsync1((e) {}, count: 0));
+        .catchError(expectAsync1((e) {print(e);}, count: 0));
       });
 
       test('with strange content', () {
@@ -89,7 +89,7 @@ main() {
           expect(response.statusCode, 200);
           expect(response.body, param);
         }))
-        .catchError(expectAsync1((e) {}, count: 0));
+        .catchError(expectAsync1((e) {print(e);}, count: 0));
       });
     });
 

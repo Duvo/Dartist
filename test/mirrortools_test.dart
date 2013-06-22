@@ -1,11 +1,20 @@
 library test.mirrortools;
 
 import 'package:unittest/unittest.dart';
-import 'package:dartist/dartist.dart';
+import '../lib/mirrortools.dart';
 import 'dart:mirrors';
 
-class Foo {}
+class Foo {
+  List<String> list = ['a', 'b', 'c'];
+}
 class Bar extends Foo {}
+
+class Foobar {
+  String string = 'string';
+  String get getter => 'getter';
+  Foo foo = new Foo();
+  Map map = {'a':'a', 'b':'b'};
+}
 
 main() {
 
@@ -57,6 +66,13 @@ main() {
     test('itself', () {
       var subclass = reflectClass(Foo);
       expect(subclassOf(subclass, Foo), isTrue);
+    });
+  });
+
+  group('map from object', () {
+    test('full', () {
+      Map<String, dynamic> map = mapFromObject(new Foobar());
+      expect(map.toString(), '{map: {a: a, b: b}, string: string, foo: {list: [a, b, c]}, getter: getter}');
     });
   });
 }
