@@ -162,7 +162,7 @@ abstract class Controller {
    * exist.
    */
   String renderMustache(String filepath, Map<String, dynamic> context) {
-    var tmp = mirror.mapFromObject(context);
+    var tmp = mirror.mappify(context);
     var source = loadFile(filepath);
     var template = mustache.parse(source);
     return template.renderString(tmp);

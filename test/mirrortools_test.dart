@@ -69,9 +69,9 @@ main() {
     });
   });
 
-  group('map from object', () {
+  group('mappify', () {
     test('full', () {
-      Map<String, dynamic> map = mapFromObject(new Foobar());
+      Map<String, dynamic> map = mappify(new Foobar());
       expect(map.toString(), '{map: {a: a, b: b}, string: string, foo: {list: [a, b, c]}, getter: getter}');
     });
   });

@@ -50,38 +50,60 @@ subclassOf(ClassMirror subclassMirror, Type superclass) {
 }
 
 /**
- * First-level method [mapFromObject].
+ * First-level method [mappify].
  */
-mapFromObject(dynamic object) {
-  if (object == null || object is String) {
-    return object;
-  }else if (object is Map) {
-    Map map = {};
-    for (var key in object.keys) {
-      String tmpKey;
-      if (key is int) {
-        tmpKey = key.toString();
-      } else if (key is String) {
-        tmpKey = key;
-      } else {
-        throw 'Map keys must be int or String.';
+dynamic mappify(dynamic object) {
+  List seen = [];
+
+  void checkCycle(final object) {
+    for (var item in seen) {
+      if (identical(item, object)) {
+        throw new MapperCyclicException(object);
       }
-      map[tmpKey] = mapFromObject(object[key]);
     }
-    return map;
-  } else if (object is Iterable) {
-    var length = object.length;
-    return new List.generate(length, (i) => mapFromObject(object[i]), growable: false);
-  } else {
-    Map map = {};
-    InstanceMirror instanceMirror = reflect(object);
-    ClassMirror classMirror = instanceMirror.type;
-    for(Symbol key in classMirror.variables.keys) {
-      map[MirrorSystem.getName(key)] = mapFromObject(instanceMirror.getField(key).reflectee);
-    }
-    for(Symbol key in classMirror.getters.keys) {
-      map[MirrorSystem.getName(key)] = mapFromObject(instanceMirror.getField(key).reflectee);
-    }
-    return map;
+    seen.add(object);
   }
+
+  dynamic mapFromObject(dynamic object) {
+    if (object is num || object is String || object is bool || object == null) {
+      return object;
+    }else if (object is Map) {
+      checkCycle(object);
+      Map map = {};
+      object.forEach((key, value) {
+        map[key.toString()] = mapFromObject(value);
+      });
+      seen.remove(object);
+      return map;
+    } else if (object is Iterable) {
+      checkCycle(object);
+      var tmp = new List.generate(object.length, (i) => mapFromObject(object[i]), growable: false);
+      seen.remove(object);
+      return tmp;
+    } else {
+      checkCycle(object);
+      Map map = {};
+      InstanceMirror instanceMirror = reflect(object);
+      ClassMirror classMirror = instanceMirror.type;
+      for(Symbol key in classMirror.variables.keys) {
+        map[MirrorSystem.getName(key)] = mapFromObject(instanceMirror.getField(key).reflectee);
+      }
+      for(Symbol key in classMirror.getters.keys) {
+        map[MirrorSystem.getName(key)] = mapFromObject(instanceMirror.getField(key).reflectee);
+      }
+      seen.remove(object);
+      return map;
+    }
+  }
+
+  return mapFromObject(object);
+}
+
+/**
+ * Class [MapperCyclicException].
+ */
+class MapperCyclicException implements Exception {
+  final Object object;
+  const MapperCyclicException(this.object);
+  String toString() => '$runtimeType: Cyclic error in mappify ${object.runtimeType}.';
 }
