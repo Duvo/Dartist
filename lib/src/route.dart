@@ -6,10 +6,9 @@ part of dartist;
 class Segment {
   String name;
   bool required;
-  int index;
   String defaultValue;
 
-  Segment(this.name, {this.index, this.required: false, this.defaultValue});
+  Segment(this.name, {this.required: false, this.defaultValue});
 }
 
 /**
@@ -25,7 +24,7 @@ class Route {
 
   Map<String, Segment> segments = {};
   String uri;
-  UrlPattern urlPattern;
+  String urlPattern;
   String method;
 
   Route(this.uri, {this.method, Map<String, String> defaultValues}) {
@@ -51,7 +50,7 @@ class Route {
       var length = match.length;
       if (length > 1) {
         var segment = match.substring(1, length-1);
-        segments[segment] = new Segment(segment, index: i+1, required: required, defaultValue: defaultValues[segment]);
+        segments[segment] = new Segment(segment, required: required, defaultValue: defaultValues[segment]);
       } else {
         required = false;
       }
@@ -75,10 +74,13 @@ class Route {
     }
 
     // Get the URL pattern from the URI.
-    String expression = uri.replaceAll(')', ')?');
-    regExp = new RegExp(SEGMENT);
-    expression = expression.replaceAll(regExp, r'(\w+)');
-    urlPattern = new UrlPattern('($expression)');
+    urlPattern = uri.replaceAll(')', ')?');
+    for(Segment segment in segments.values) {
+      urlPattern = urlPattern.replaceAll('<${segment.name}>', '(' + segment.name + r':\w+)');
+    }
+    if (method != null) {
+      urlPattern = '${method.toLowerCase()}:$urlPattern';
+    }
   }
 }
 

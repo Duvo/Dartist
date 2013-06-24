@@ -1,13 +1,13 @@
 name: dartist
-version: 0.1.0
+version: 0.0.2
 author: Duvo <noemi.salaun@gmail.com>
 description: Simple Dart web server.
 homepage: https://github.com/Duvo/Dartist
 dependencies:
   mustache: any
-  route: '>=0.4.5 <=0.4.5'
+  route: any
+  stream: any
 dev_dependencies:
-  args: any
   browser: any
   crypto: any
   http: any

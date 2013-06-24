@@ -3,11 +3,12 @@ library test.controller;
 import 'package:unittest/unittest.dart';
 import 'package:unittest/mock.dart';
 import 'package:dartist/dartist.dart';
+import 'package:stream/stream.dart';
 import 'dart:io';
 
 import 'examples/template.dart';
 
-class HttpRequestMock extends Mock implements HttpRequest {
+class HttpConnectMock extends Mock implements HttpConnect {
   HttpResponseMock response = new HttpResponseMock();
 }
 
@@ -34,25 +35,26 @@ class Foobar {
 class ControllerMock extends Controller {
   var result;
 
-  ControllerMock(HttpRequestMock request,
+  ControllerMock(HttpConnectMock connect,
       Map<String,
       String> parameters)
-      : super(request, parameters);
+      : super(connect, parameters);
 
   before() {
-    request.response.beforeDone = true;
+    connect.response.beforeDone = true;
   }
 
   after() {
-    request.response.afterDone = true;
+    connect.response.afterDone = true;
+    connect.response.close();
   }
 
   withParameters() {
-    request.response.result = parameters['foo'];
+    connect.response.result = parameters['foo'];
   }
 
   withoutParameter() {
-    request.response.result = 'ok';
+    connect.response.result = 'ok';
   }
 
   withTemplate() {
@@ -60,7 +62,7 @@ class ControllerMock extends Controller {
                    'title' : 'My Title',
                    'options': ['Foo', 'Bar', 'Foobar']
     };
-    request.response.result = template(context);
+    connect.response.result = template(context);
   }
 
   withMustache() {
@@ -72,7 +74,7 @@ class ControllerMock extends Controller {
                                new Foobar('foo3', 'bar3')
                    ]
     };
-    request.response.result = renderMustache('examples/mustache.html', context);
+    connect.response.result = renderMustache('examples/mustache.html', context);
   }
 }
 
@@ -80,43 +82,43 @@ main() {
 
   test('with template', () {
     var expected = ['<li>Foo</li>','<li>Bar</li>', '<li>Foobar</li>'];
-    var request = new HttpRequestMock();
-    request.response._onClose = expectAsync0(() {
-      expect(request.response.result, stringContainsInOrder(expected));
-      expect(request.response.beforeDone, isTrue);
-      expect(request.response.afterDone, isTrue);
+    var connect = new HttpConnectMock();
+    connect.response._onClose = expectAsync0(() {
+      expect(connect.response.result, stringContainsInOrder(expected));
+      expect(connect.response.beforeDone, isTrue);
+      expect(connect.response.afterDone, isTrue);
     });
-    var controller = new ControllerMock(request, {'action': 'withtemplate'});
+    var controller = new ControllerMock(connect, {'action': 'withtemplate'});
+    controller.execute();
   });
 
   test('with mustache', () {
     var expected = ['<li>foo1-bar1</li>','<li>foo2-bar2</li>', '<li>foo3-bar3</li>'];
-    var request = new HttpRequestMock();
-    request.response._onClose = expectAsync0(() {
-      expect(request.response.result, stringContainsInOrder(expected));
-      expect(request.response.beforeDone, isTrue);
-      expect(request.response.afterDone, isTrue);
+    var connect = new HttpConnectMock();
+    connect.response._onClose = expectAsync0(() {
+      expect(connect.response.result, stringContainsInOrder(expected));
+      expect(connect.response.beforeDone, isTrue);
+      expect(connect.response.afterDone, isTrue);
     });
-    var controller = new ControllerMock(request, {'action': 'withmustache'});
+    var controller = new ControllerMock(connect, {'action': 'withmustache'});
+    controller.execute();
   });
 
   test('execute the action with parameters', () {
     var expected = 'bar';
-    var request = new HttpRequestMock();
-    request.response._onClose = expectAsync0(() {
-      expect(request.response.result, expected);
-      expect(request.response.beforeDone, isTrue);
-      expect(request.response.afterDone, isTrue);
+    var connect = new HttpConnectMock();
+    connect.response._onClose = expectAsync0(() {
+      expect(connect.response.result, expected);
+      expect(connect.response.beforeDone, isTrue);
+      expect(connect.response.afterDone, isTrue);
     });
-    var controller = new ControllerMock(request, {'action': 'withparameters', 'foo' : expected});
+    var controller = new ControllerMock(connect, {'action': 'withparameters', 'foo' : expected});
+    controller.execute();
   });
 
   test('404', () {
-    var request = new HttpRequestMock();
-    request.response._onClose = expectAsync0(() {
-      expect(request.response.statusCode, 404);
-      expect(request.response.beforeDone, isTrue);
-    }, count: 2);
-    var controller = new ControllerMock(request, {'action': 'other'});
+    var connect = new HttpConnectMock();
+    var controller = new ControllerMock(connect, {'action': 'other'});
+    expect(controller.execute(), throwsA(new isInstanceOf<Http404>()));
   });
 }

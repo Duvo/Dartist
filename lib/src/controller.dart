@@ -7,18 +7,18 @@ part of dartist;
  * The [Controller] must be routed to the [Server] with a [Route].
  * For ease of use, the [Controller] must have a simple library name. It will be
  * referenced by the **<library>** [Segment] in the [Route]. The class name of
- * this [Controller] is important too, it will be referenced by the **<controller>**
- * [Segment]. And finally, functions names are also important, because the
- * **<action>** [Segment] can be used.
+ * this [Controller] is important too, it will be referenced by the
+ * **<controller>** [Segment]. And finally, functions names are also important,
+ * because the **<action>** [Segment] can be used.
  *
  *      library mylibrary;
  *      import package:dartist/dartist.dart;
  *
  *      class MyController extends Controller {
- *        MyController(request, parameters) : super(request, parameters);
+ *        MyController(connect, parameters) : super(connect, parameters);
  *
  *        myAction() {
- *          this.request.response.write('Hello world!');
+ *          this.connect.response.write('Hello world!');
  *        }
  *      }
  *
@@ -43,18 +43,18 @@ part of dartist;
  *
  *      /api/myaction?param=foobar
  *
- * The [Controller] knows the [HttpRequest] that called it. Thus, it can
- * access to all [HttpRequest] information, like query parameters or
+ * The [Controller] knows the [HttpConnect] that called it. Thus, it can
+ * access to all [HttpConnect] information, like query parameters or
  * posted data. For example:
  *
- *      this.request.uri.queryParameters['param'];
+ *      this.connect.request.uri.queryParameters['param'];
  */
 abstract class Controller {
 
   /**
-   * The [HttpRequest] that called this [Controller].
+   * The [HttpConnect] that called this [Controller].
    */
-  HttpRequest request;
+  HttpConnect connect;
 
   /**
    * The [Map] that contains [Segment] values.
@@ -62,32 +62,33 @@ abstract class Controller {
   Map<String, String> parameters;
 
   /**
-   * The [Map] that contains parsed fields of the request content.
+   * The [Map] that contains parsed fields of the [connect.request] content.
    * It is used for cache.
    */
   Map _fields;
 
   /**
-   * Create a [Controller] with the given [request] and [parameters] that
-   * contains a [Map] of [Segment]s values. The new [Controller] automatically
-   * calls [before], then runs the **<action>**, depending on the [Segment] and
-   * finally calls [after].
+   * Create a [Controller] with the given [connect] and [parameters] that
+   * contains a [Map] of [Segment]s values.
    */
-  Controller(this.request, this.parameters) {
-    new Future.sync(() => before())
-    .then((_) => new Future.sync(() => execute()))
-    .then((_) => new Future.sync(() => after()))
-    .whenComplete(() {
-      request.response.close();
-    });
+  Controller(this.connect, this.parameters);
+
+  /**
+   * Calls [before], then [runAction], depending on the **<action>** [parameters]
+   * and finally calls [after].
+   */
+  Future execute() {
+    return new Future.sync(() => before())
+    .then((_) => new Future.sync(() => runAction()))
+    .then((_) => new Future.sync(() => after()));
   }
 
   /**
-   * The function executed before the **<action>**.
+   * The function executed before [runAction].
    *
-   * If the return is a [Future](dart.async) the [Controller] will wait until
+   * If the return is a [Future] the [Controller] will wait until
    * the returned [Future] completes. Otherwise the [Controller] simply runs the
-   * **<action>** afterwards.
+   * [runAction] afterwards.
    */
   dynamic before() {}
 
@@ -95,10 +96,10 @@ abstract class Controller {
    * The main function of the [Controller]. It handles the **<action>** from
    * [parameters], then checks and calls the correct **<action>**.
    *
-   * Return the value returned by the called **<action>**, or send a 404 error if this
-   * **<action>** doesn't exist, then return [:null:].
+   * Return the value returned by the called **<action>**, or send a 404 error
+   * if this **<action>** doesn't exist, then return [:null:].
    */
-  dynamic execute() {
+  dynamic runAction() {
     String action = parameters['action'];
     InstanceMirror instanceMirror = reflect(this);
     ClassMirror classMirror = instanceMirror.type;
@@ -106,33 +107,39 @@ abstract class Controller {
       MethodMirror methodMirror = classMirror.methods[symbol];
       if (methodMirror.isRegularMethod && !methodMirror.isAbstract) {
         if (action.toLowerCase() == MirrorSystem.getName(symbol).toLowerCase()) {
-          return instanceMirror.invoke(symbol, []).reflectee;
+          try {
+            return instanceMirror.invoke(symbol, []).reflectee;
+          } on MirroredUncaughtExceptionError catch(e) {
+            throw e.exception_mirror.reflectee;
+          }
         }
       }
     }
-    send404(request);
+    throw new Http404();
   }
 
   /**
-   * The function executed after the **<action>**.
+   * The function executed after [runAction].
    *
-   * If the return is a [Future](dart.async) the [Controller] will wait until
+   * If the return is a [Future] the [Controller] will wait until
    * the returned future completes. Otherwise the [Controller] directly close
-   * the [request].
+   * the [connect.response].
    */
   dynamic after() {}
 
   /**
-   * Parse the content of the [request], and extract a [Map] of its values.
+   * Parse the content of the [connect.request], and extract a [Map] of its
+   * values.
    *
-   * This [Map] is stored in the [Controller] instance, so, for the next call, the values will
-   * be directly retrieved from its attribut, and not parsed from the [request].
+   * This [Map] is stored in the [Controller] instance, so, for the next call,
+   * the values will be directly retrieved from its attribut, and not parsed
+   * from the [connect.request].
    *
-   * Return a [Future] containing the [Map] of the [request] content.
+   * Return a [Future] containing the [Map] of the [connect.request] content.
    */
   Future<Map<String, String>> getFields() {
     if (_fields == null) {
-      return request.single.then((data) {
+      return connect.request.single.then((data) {
         _fields = Uri.splitQueryString(new String.fromCharCodes(data));
         return _fields;
       });
@@ -144,7 +151,7 @@ abstract class Controller {
   /**
    * Load the content of the [File] targeted by the [filepath].
    *
-   * Return the [String] content of the [File](dart.io), or [:null:] if the
+   * Return the [String] content of the [File], or [:null:] if the
    * [File] doesn't exist.
    */
   String loadFile(String filepath) {
@@ -164,7 +171,11 @@ abstract class Controller {
   String renderMustache(String filepath, Map<String, dynamic> context) {
     var map = mirror.mappify(context);
     var source = loadFile(filepath);
-    var template = mustache.parse(source);
-    return template.renderString(map);
+    if (source == null) {
+      return null;
+    } else {
+      var template = mustache.parse(source);
+      return template.renderString(map);
+    }
   }
 }

@@ -6,13 +6,17 @@ import 'dart:mirrors';
  * First-level method [findLibrary].
  */
 findLibrary(String library, {caseSensitive: false}) {
-  if (caseSensitive) {
-    Iterable libraries = currentMirrorSystem().findLibrary(new Symbol(library));
-    return libraries.isEmpty ? null : libraries.first;
+  if (library == null) {
+    return null;
   } else {
-    for (LibraryMirror mirror in currentMirrorSystem().libraries.values) {
-      if (MirrorSystem.getName(mirror.simpleName).toLowerCase() == library.toLowerCase()) {
-        return mirror;
+    if (caseSensitive) {
+      Iterable libraries = currentMirrorSystem().findLibrary(new Symbol(library));
+      return libraries.isEmpty ? null : libraries.first;
+    } else {
+      for (LibraryMirror mirror in currentMirrorSystem().libraries.values) {
+        if (MirrorSystem.getName(mirror.simpleName).toLowerCase() == library.toLowerCase()) {
+          return mirror;
+        }
       }
     }
   }
