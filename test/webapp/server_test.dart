@@ -57,10 +57,7 @@ main() {
   var library = MirrorSystem.getName(currentMirrorSystem().isolate.rootLibrary.qualifiedName);
   var controller = 'fakecontroller';
   var routes = [
-                new Route('/default/<controller>-<action>/<param>', method: 'GET', defaultValues: {
-                  'library' : library
-                }),
-                new Route('/default/<controller>-<action>', method: 'GET', defaultValues: {
+                new Route('/default/<controller>-<action>(/<param>)', method: 'GET', defaultValues: {
                   'library' : library
                 }),
                 new Route('/<library>/<controller>-<action>', method: 'GET'),
