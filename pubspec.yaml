@@ -4,7 +4,7 @@ author: Duvo <noemi.salaun@gmail.com>
 description: Simple Dart web server.
 homepage: https://github.com/Duvo/Dartist
 dependencies:
-  mustache: any
+  mustache4dart: any
   route: any
   stream: any
 dev_dependencies:

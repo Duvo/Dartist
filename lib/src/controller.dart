@@ -168,14 +168,12 @@ abstract class Controller {
    * Return the result [String] generated, or [:null:] if the [File] doesn't
    * exist.
    */
-  String renderMustache(String filepath, Map<String, dynamic> context) {
-    var map = mirror.mappify(context);
+  String renderMustache(String filepath, dynamic context) {
     var source = loadFile(filepath);
     if (source == null) {
       return null;
     } else {
-      var template = mustache.parse(source);
-      return template.renderString(map);
+      return mustache.render(source, context);
     }
   }
 }
